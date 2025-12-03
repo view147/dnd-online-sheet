@@ -100,10 +100,6 @@ function renderBar(current, max, colorClass) {
     const percent = Math.max(0, Math.min(100, (current / max) * 100));
     const valueText = `${current}/${max} (${Math.round(percent)}%)`;
 
-    // Calculate text color contrast (simple dark/light check for readability)
-    const isDark = percent > 50; 
-    const textColor = isDark ? 'white' : '#1f1f1f';
-
     return `
         <div class="hp-bar-container">
             <div class="hp-fill ${colorClass}" style="width:${percent}%;">
@@ -120,7 +116,7 @@ function renderBar(current, max, colorClass) {
 function setupDMListener(db) {
     const dashboardBody = document.getElementById('dashboard-body');
     
-    // Listen to all changes in the 'characters' collection
+    // ตรวจสอบชื่อ Collection: ต้องตรงกับที่ Player Sheet บันทึก (ซึ่งคือ 'characters')
     db.collection("characters").onSnapshot((querySnapshot) => {
         let html = '';
         
