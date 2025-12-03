@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>DM Real-time Dashboard (Online Monitor)</title>
+<style>
+    body { background: #1f1f1f; color: #e0e0e0; font-family: "Segoe UI", Tahoma, sans-serif; padding: 20px; }
+    h1 { color: #f0ad4e; border-bottom: 2px solid #5a3d24; padding-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #444; padding: 10px; text-align: left; }
+    th { background: #333; color: #fff; }
+    tr:nth-child(even) { background-color: #2a2a2a; }
+    tr:hover { background-color: #3b3b3b; }
+    .status-text { font-weight: bold; }
+    .hp-bar-container { height: 15px; background: #666; border-radius: 4px; overflow: hidden; }
+    .hp-fill { height: 100%; background: #cc3333; transition: width 0.3s; }
+    .water-fill { background: #0077b3; }
+    .food-fill { background: #cc8800; }
+    .sanity-fill { background: #5533cc; }
+    .stress-fill { background: #880000; }
+    .paused { color: #f0ad4e; font-style: italic; font-weight: bold;}
+    .running { color: #28a745; font-weight: bold;}
+    .status-area { margin-bottom: 15px; font-size: 0.9em; color: #aaa; }
+    .timer-text { font-family: monospace; font-size: 0.9rem; }
+    td, th { text-align: center; }
+    td:first-child { text-align: left; }
+</style>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<h1>👁️‍🗨️ DM Real-time Dashboard</h1>
+<div id="status" class="status-area">สถานะ: กำลังเชื่อมต่อฐานข้อมูล...</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID ตัวละคร</th>
+            <th>HP</th>
+            <th>น้ำ</th>
+            <th>อาหาร</th>
+            <th>สติ</th>
+            <th>ความเครียด</th>
+            <th>สถานะเวลา</th>
+        </tr>
+    </thead>
+    <tbody id="dashboard-body">
+        <tr><td colspan="7" style="text-align:center;">รอการโหลดข้อมูล...</td></tr>
+    </tbody>
+</table>
+
+<script>
+// ==========================================================
+// 🚨🚨 ส่วนที่ 1: โค้ด Firebase Connection 🚨🚨
+// *กรุณาใส่กุญแจลับจริงของคุณตรงนี้*
+// ==========================================================
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY_HERE", // <-- 🔑 แทนที่ด้วยค่าจริงของคุณ
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // <-- 🔑 แทนที่ด้วยค่าจริงของคุณ
+  projectId: "YOUR_PROJECT_ID", // <-- 🔑 แทนที่ด้วยค่าจริงของคุณ
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
+};
+
+// Initialize Firebase & Firestore
+try {
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    document.getElementById('status').textContent = 'สถานะ: เชื่อมต่อ Firebase สำเร็จ. กำลังดึงข้อมูล...';
+    setupDMListener(db);
+} catch (e) {
+    document.getElementById('status').textContent = 'สถานะ: ❌ เชื่อมต่อล้มเหลว! กรุณาตรวจสอบ Firebase Config.';
+}
+
+const MAX_TIME = 3 * 60 * 60; // 10800 seconds
+
+/**
+ * Formats time from seconds to HH:MM:SS
+ */
+function formatTime(seconds) {
+  if (seconds < 0) seconds = 0;
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+}
+
+/**
+ * Renders a progress bar based on current/max value.
+ */
+function renderBar(current, max, colorClass) {
+    const percent = Math.max(0, Math.min(100, (current / max) * 100));
+    return `
+        <div class="hp-bar-container">
+            <div class="hp-fill ${colorClass}" style="width:${percent}%"></div>
+        </div>
+        ${current}/${max} (${Math.round(percent)}%)
+    `;
+}
+
+/**
+ * Main listener function for DM Dashboard.
+ * It listens to the entire 'characters' collection.
+ */
+function setupDMListener(db) {
+    const dashboardBody = document.getElementById('dashboard-body');
+    
+    // Listen to all changes in the 'characters' collection
+    db.collection("characters").onSnapshot((querySnapshot) => {
+        let html = '';
+        
+        querySnapshot.forEach((doc) => {
+            const id = doc.id;
+            const data = doc.data();
+            
+            // Default values and check for existence
+            const hp = data.hp ?? 0;
+            const maxhp = data.maxhp ?? 200;
+            const waterTime = data.waterTime ?? 0;
+            const foodTime = data.foodTime ?? 0;
+            const sanity = data.sanity ?? 0;
+            const stress = data.stress ?? 0;
+            const isPaused = data.isPaused ?? false;
+
+            // Generate HTML Row
+            html += `
+                <tr>
+                    <td><span class="status-text">${id}</span></td>
+                    <td>${renderBar(hp, maxhp, '')}</td>
+                    <td>
+                        ${renderBar(waterTime, MAX_TIME, 'water-fill')}
+                        <span class="timer-text">${formatTime(waterTime)}</span>
+                    </td>
+                    <td>
+                        ${renderBar(foodTime, MAX_TIME, 'food-fill')}
+                        <span class="timer-text">${formatTime(foodTime)}</span>
+                    </td>
+                    <td>${renderBar(sanity, 100, 'sanity-fill')}</td>
+                    <td>${renderBar(stress, 200, 'stress-fill')}</td>
+                    <td>${isPaused ? '<span class="paused">⏸️ หยุดเวลา</span>' : '<span class="running">▶️ ทำงานปกติ</span>'}</td>
+                </tr>
+            `;
+        });
+        
+        // Update the entire table body
+        if (html === '') {
+            dashboardBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">ยังไม่มีผู้เล่นเชื่อมต่อ</td></tr>`;
+        } else {
+            dashboardBody.innerHTML = html;
+        }
+
+        document.getElementById('status').textContent = `สถานะ: ✅ อัปเดตข้อมูลล่าสุด (${querySnapshot.size} ตัวละคร)`;
+    }, (error) => {
+        console.error("Listener error:", error);
+        document.getElementById('status').textContent = `สถานะ: ❌ การเชื่อมต่อฐานข้อมูลมีปัญหา!`;
+    });
+}
+</script>
+</body>
+</html>
