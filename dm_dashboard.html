@@ -12,18 +12,21 @@
     tr:nth-child(even) { background-color: #2a2a2a; }
     tr:hover { background-color: #3b3b3b; }
     .status-text { font-weight: bold; }
-    .hp-bar { height: 15px; background: #666; border-radius: 4px; overflow: hidden; }
+    .hp-bar-container { height: 15px; background: #666; border-radius: 4px; overflow: hidden; }
     .hp-fill { height: 100%; background: #cc3333; transition: width 0.3s; }
     .water-fill { background: #0077b3; }
     .food-fill { background: #cc8800; }
     .sanity-fill { background: #5533cc; }
     .stress-fill { background: #880000; }
-    .paused { color: #f0ad4e; font-style: italic; }
+    .paused { color: #f0ad4e; font-style: italic; font-weight: bold;}
+    .running { color: #28a745; font-weight: bold;}
     .status-area { margin-bottom: 15px; font-size: 0.9em; color: #aaa; }
-    
-    /* Utility for Time */
     .timer-text { font-family: monospace; font-size: 0.9rem; }
+    td, th { text-align: center; }
+    td:first-child { text-align: left; }
 </style>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -47,22 +50,19 @@
     </tbody>
 </table>
 
-<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
-
 <script>
-// ======================================================================
-// ⚠️ ขั้นตอนที่ 1: เปลี่ยน Placeholder นี้ด้วย Firebase Config ของคุณเอง ⚠️
-// ======================================================================
+// ==========================================================
+// 🚨🚨 ส่วนที่ 1: โค้ด Firebase Connection 🚨🚨
+// *กรุณาใส่กุญแจลับจริงของคุณตรงนี้*
+// ==========================================================
 const firebaseConfig = {
-  apiKey: "AIzaSyBj_cHaCkXg9cMKjxJhNKKV9qcv8AeuuMA",
-  authDomain: "dnd-pale-character.firebaseapp.com",
-  projectId: "dnd-pale-character", // ต้องเปลี่ยน!
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "YOUR_API_KEY_HERE", // <-- 🔑 แทนที่ด้วยค่าจริงของคุณ
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // <-- 🔑 แทนที่ด้วยค่าจริงของคุณ
+  projectId: "YOUR_PROJECT_ID", // <-- 🔑 แทนที่ด้วยค่าจริงของคุณ
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
 };
-// ======================================================================
 
 // Initialize Firebase & Firestore
 try {
@@ -93,7 +93,7 @@ function formatTime(seconds) {
 function renderBar(current, max, colorClass) {
     const percent = Math.max(0, Math.min(100, (current / max) * 100));
     return `
-        <div class="hp-bar">
+        <div class="hp-bar-container">
             <div class="hp-fill ${colorClass}" style="width:${percent}%"></div>
         </div>
         ${current}/${max} (${Math.round(percent)}%)
@@ -115,14 +115,14 @@ function setupDMListener(db) {
             const id = doc.id;
             const data = doc.data();
             
-            // Default values
-            const hp = data.hp || 0;
-            const maxhp = data.maxhp || 200;
-            const waterTime = data.waterTime || 0;
-            const foodTime = data.foodTime || 0;
-            const sanity = data.sanity || 0;
-            const stress = data.stress || 0;
-            const isPaused = data.isPaused || false;
+            // Default values and check for existence
+            const hp = data.hp ?? 0;
+            const maxhp = data.maxhp ?? 200;
+            const waterTime = data.waterTime ?? 0;
+            const foodTime = data.foodTime ?? 0;
+            const sanity = data.sanity ?? 0;
+            const stress = data.stress ?? 0;
+            const isPaused = data.isPaused ?? false;
 
             // Generate HTML Row
             html += `
@@ -139,7 +139,7 @@ function setupDMListener(db) {
                     </td>
                     <td>${renderBar(sanity, 100, 'sanity-fill')}</td>
                     <td>${renderBar(stress, 200, 'stress-fill')}</td>
-                    <td>${isPaused ? '<span class="paused">⏸️ หยุดเวลา</span>' : '▶️ ทำงานปกติ'}</td>
+                    <td>${isPaused ? '<span class="paused">⏸️ หยุดเวลา</span>' : '<span class="running">▶️ ทำงานปกติ</span>'}</td>
                 </tr>
             `;
         });

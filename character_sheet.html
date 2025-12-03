@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<title>Character Sheet: Fantasy + Survival (3Hr)</title>
+<title>Character Sheet: Fantasy + Survival (Online)</title>
 <style>
   /* Theme Colors */
   :root {
@@ -14,204 +14,285 @@
     --btn-hover: #7a5c38;
   }
 
-  body { background: var(--bg-color); color: var(--text-color); font-family: "Segoe UI", Tahoma, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+  body { 
+    background: var(--bg-color); 
+    color: var(--text-color); 
+    font-family: "Segoe UI", Tahoma, sans-serif; 
+    padding: 20px; 
+    max-width: 800px; 
+    margin: 0 auto; 
+  }
   
   /* Layout Boxes */
-  .box { border: 3px solid var(--border-color); background: var(--box-bg); padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+  .box { 
+    border: 3px solid var(--border-color); 
+    background: var(--box-bg); 
+    padding: 15px; 
+    border-radius: 12px; 
+    margin-bottom: 20px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5); 
+  }
   
-  h2 { margin-top: 0; color: #ffd26a; border-bottom: 1px solid #5a3d24; padding-bottom: 8px; margin-bottom: 15px; font-size: 1.4rem; }
-  h3 { margin: 10px 0 5px 0; color: #e0c090; font-size: 1.1rem; }
-
-  /* Inputs & Buttons */
-  input, select, button, textarea { background: var(--input-bg); color: #ffe7b3; border: 1px solid var(--border-color); padding: 5px; border-radius: 6px; font-size: 1rem; }
-  button { cursor: pointer; font-weight: bold; transition: background 0.2s; }
-  button:hover { background: var(--btn-hover); filter: brightness(1.1); }
-  button:active { transform: translateY(1px); }
-
-  .flex { display: flex; gap: 10px; flex-wrap: wrap; }
-  .statbox { width: 80px; text-align: center; background: #2b1e12; padding: 8px; border-radius: 8px; border: 1px solid #5a3d24; }
-  .statbox input { width: 90%; text-align: center; }
-
-  /* Bars System */
-  .bar-wrapper { margin-bottom: 15px; }
-  .bar-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px; }
-  .timer-text { font-family: monospace; font-size: 1.1rem; color: #ffd26a; font-weight: bold; }
+  h2 { 
+    margin-top: 0; 
+    color: #ffd26a; 
+    border-bottom: 1px solid #5a3d24; 
+    padding-bottom: 8px; 
+    margin-bottom: 15px; 
+    font-size: 1.4rem; 
+  }
   
-  .bar-container { width: 100%; background: #1a120b; height: 24px; border-radius: 12px; overflow: hidden; border: 2px solid #5a3d24; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.6); }
-  .bar { height: 100%; text-align: center; color: white; font-weight: bold; line-height: 24px; text-shadow: 1px 1px 2px black; font-size: 0.9rem; transition: width 0.3s linear; }
+  input, select, button { 
+    background: var(--input-bg); 
+    color: var(--text-color); 
+    border: 2px solid var(--border-color); 
+    padding: 6px; 
+    border-radius: 6px; 
+    margin: 4px 0; 
+  }
+  
+  button { 
+    cursor: pointer; 
+    transition: background 0.2s; 
+  }
+  
+  button:hover { 
+    background: var(--btn-hover); 
+  }
+  
+  /* Bars */
+  .bar-container { 
+    width: 100%; 
+    background: #2b1e12; 
+    height: 30px; 
+    margin: 8px 0; 
+    border-radius: 8px; 
+    overflow: hidden; 
+    border: 2px solid var(--border-color); 
+  }
+  
+  .bar { 
+    height: 100%; 
+    text-align: center; 
+    color: white; 
+    font-weight: bold; 
+    line-height: 30px; 
+    transition: width 0.3s;
+  }
+  
+  #hp-bar { background: #cc3333; }
+  #water-bar { background: #0077b3; }
+  #food-bar { background: #cc8800; }
+  #sanity-bar { background: #5533cc; }
+  #stress-bar { background: #880000; }
 
-  /* Specific Bar Colors */
-  #hp-bar { background: linear-gradient(90deg, #cc3333, #ff6666); }
-  #water-bar { background: linear-gradient(90deg, #0077b3, #00aaff); }
-  #food-bar { background: linear-gradient(90deg, #cc8800, #ffaa00); }
-  #sanity-bar { background: linear-gradient(90deg, #5533cc, #7a5cff); }
-  #stress-bar { background: linear-gradient(90deg, #880000, #aa3333); }
-
-  /* Control Buttons Colors */
-  .btn-heal { background: #cc3333; color: white; border-color: #ff6666; }
-  .btn-water { background: #0077b3; color: white; border-color: #00aaff; }
-  .btn-food { background: #cc8800; color: white; border-color: #ffaa00; }
-  .btn-sanity { background: #5533cc; color: white; border-color: #7a5cff; }
-  .btn-stress { background: #880000; color: white; border-color: #aa3333; }
-  .btn-pause { background: #666; color: white; width: 120px; }
-  .btn-pause.paused { background: #28a745; border-color: #4cd16e; } /* Green when ready to resume */
-
-  .controls { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-  .small-text { font-size: 0.8rem; color: #aaa; margin-left: 5px; }
-
-  /* Dice & Stress Calc */
-  .dice-section { background: #2b1e12; padding: 10px; border-radius: 8px; margin-top: 10px; }
-  .result-span { color: #ffd26a; font-weight: bold; margin-left: 5px; }
+  .flex { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .full-width { width: 100%; }
+  .paused { background-color: #f0ad4e !important; color: #2b1e12 !important; font-weight: bold; }
+  .timer-text { font-family: monospace; font-size: 0.9rem; }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
 </head>
 <body>
 
-<div class="box">
-  <h2>❤️ พลังชีวิต (HP)</h2>
-  <div class="bar-container">
-    <div id="hp-bar" class="bar" style="width: 100%;">200/200</div>
-  </div>
-  <div class="controls" style="margin-top: 10px; justify-content: center;">
-    <label>HP:</label> <input id="hp" type="number" value="200" style="width:60px;">
-    <label>/</label> <input id="maxhp" type="number" value="200" style="width:60px;">
-    <span style="width:20px;"></span>
-    <input id="hp_change" type="number" placeholder="+/-" style="width:60px;">
-    <button class="btn-heal" onclick="adjustHP()">ปรับ HP</button>
-  </div>
+<div class="box" id="connection-box">
+    <h2>🔗 การเชื่อมต่อฐานข้อมูล</h2>
+    <div class="flex full-width">
+        <label for="char-id">ID ตัวละคร (ต้องไม่ซ้ำใคร):</label>
+        <input type="text" id="char-id" value="Player1" placeholder="เช่น: Arya, Bardic" style="flex-grow: 1;">
+        <button onclick="connectCharacter()">เชื่อมต่อ/เริ่มเกม</button>
+    </div>
+    <p id="status-message" style="color:#d1a056; margin-top:10px;">สถานะ: กรุณาใส่ ID และกด "เชื่อมต่อ/เริ่มเกม"</p>
 </div>
 
-<div class="box">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-    <h2 style="margin:0; border:none;">⏳ การยังชีพ (3 ชั่วโมง)</h2>
-    <button id="pause-btn" class="btn-pause" onclick="togglePause()">⏸️ หยุดเวลา</button>
-  </div>
-  <hr style="border-color:#5a3d24; margin-bottom:15px;">
 
-  <div class="bar-wrapper">
-    <div class="bar-header">
-      <span>💧 น้ำ (Water)</span>
-      <span id="water-timer" class="timer-text">03:00:00</span>
+<div id="game-dashboard" style="display:none;">
+    
+    <div class="box">
+        <h2>❤️ HP (Health Points)</h2>
+        <div class="bar-container"><div class="bar" id="hp-bar">0/200</div></div>
+        <div class="flex">
+            <input type="number" id="hp" value="200" style="width: 60px;"> / 
+            <input type="number" id="maxhp" value="200" style="width: 60px;"> (Max HP)
+        </div>
+        
+        <hr style="border-color:#5a3d24; margin:10px 0;">
+        
+        <div class="flex">
+            <input type="number" id="hp_change" value="10" style="width: 80px;">
+            <button onclick="adjustHP(1)">+ เพิ่ม HP</button>
+            <button onclick="adjustHP(-1)">- ลด HP</button>
+        </div>
     </div>
-    <div class="bar-container">
-      <div id="water-bar" class="bar" style="width: 100%;">100%</div>
+    
+    <div class="box">
+        <h2>⏱️ ระบบเวลา & Survival</h2>
+        <button id="pause-btn" onclick="togglePause()" class="full-width">⏸️ หยุดเวลา</button>
+        <p style="font-size:0.9em; color:#d1a056;">**ระบบน้ำและอาหารจะหยุดทำงานเมื่อกดปุ่มนี้**</p>
     </div>
-    <div class="controls">
-      <input type="number" id="drink-amount" value="20" style="width:50px;"> %
-      <button class="btn-water" onclick="refill('water')">ดื่มน้ำ</button>
-      <span class="small-text">(ไม่เพิ่ม HP)</span>
+    
+    <div class="box">
+        <h2>💧 ระบบน้ำ (3 ชั่วโมง)</h2>
+        <div class="bar-container"><div class="bar" id="water-bar">100% (03:00:00)</div></div>
+        <p id="water-timer" class="timer-text" style="text-align:right;">03:00:00</p>
+        <div class="flex">
+            <input type="number" id="drink-amount" value="50" style="width: 80px;" min="0" max="100"> %
+            <button onclick="refill('water')">💧 ดื่ม/เติมน้ำ</button>
+        </div>
     </div>
-  </div>
-
-  <div class="bar-wrapper">
-    <div class="bar-header">
-      <span>🍗 อาหาร (Food)</span>
-      <span id="food-timer" class="timer-text">03:00:00</span>
-    </div>
-    <div class="bar-container">
-      <div id="food-bar" class="bar" style="width: 100%;">100%</div>
-    </div>
-    <div class="controls">
-      <input type="number" id="eat-amount" value="20" style="width:50px;"> %
-      <button class="btn-food" onclick="refill('food')">กินอาหาร</button>
-      <span class="small-text">(ไม่เพิ่ม HP)</span>
-    </div>
-  </div>
-</div>
-
-<div class="box">
-  <h2>🧠 สภาพจิตใจ</h2>
-  
-  <div class="bar-wrapper">
-    <div class="bar-header"><span>🔮 สติ (Sanity)</span></div>
-    <div class="bar-container">
-      <div id="sanity-bar" class="bar" style="width: 100%;">100/100</div>
-    </div>
-    <div class="controls">
-      <input type="number" id="sanity-adj" value="10" style="width:50px;">
-      <button class="btn-sanity" onclick="adjustSanity(1)">+ ฟื้นฟู</button>
-      <button style="background:#444; color:white;" onclick="adjustSanity(-1)">- ลดสติ</button>
-    </div>
-  </div>
-
-  <div class="bar-wrapper">
-    <div class="bar-header"><span>💢 ความเครียด (Stress - Max 200)</span></div>
-    <div class="bar-container">
-      <div id="stress-bar" class="bar" style="width: 0%;">0/200</div>
-    </div>
-    <div class="controls">
-      <input type="number" id="stress-adj" value="10" style="width:50px;">
-      <button class="btn-stress" onclick="adjustStress(1)">+ เพิ่มเครียด</button>
-      <button style="background:#444; color:white;" onclick="adjustStress(-1)">- ลดเครียด</button>
+    
+    <div class="box">
+        <h2>🥖 ระบบอาหาร (3 ชั่วโมง)</h2>
+        <div class="bar-container"><div class="bar" id="food-bar">100% (03:00:00)</div></div>
+        <p id="food-timer" class="timer-text" style="text-align:right;">03:00:00</p>
+        <div class="flex">
+            <input type="number" id="eat-amount" value="50" style="width: 80px;" min="0" max="100"> %
+            <button onclick="refill('food')">🥩 กิน/เติมอาหาร</button>
+        </div>
     </div>
 
-    <div class="dice-section">
-      <strong>🎲 คำนวณผลลบเต๋าจากความเครียด</strong><br>
-      <div style="margin-top:5px; display:flex; align-items:center; gap:10px;">
-        จำนวนลูกเต๋า: <input type="number" id="dice-count-calc" value="3" style="width:40px;">
-        <button onclick="calcStressPenalty()">คำนวณ</button>
-        <span id="stress-penalty-result" class="result-span">ผลลบ: 0</span>
-      </div>
-      <div class="small-text" style="margin-top:4px;">(เครียดทุก 10 แต้ม ลบตามจำนวนลูกเต๋า | เครียดเกิน 150 ลบ 30 ทันที)</div>
+    <div class="box">
+        <h2>🧠 สติ (Sanity) และ ความเครียด (Stress)</h2>
+        
+        <h3>สติ (Sanity: 0-100)</h3>
+        <div class="bar-container"><div class="bar" id="sanity-bar" style="width:100%;">100/100</div></div>
+        <div class="flex">
+            <input type="number" id="sanity-adj" value="5" style="width: 80px;">
+            <button onclick="adjustSanity(1)">+ เพิ่มสติ</button>
+            <button onclick="adjustSanity(-1)">- ลดสติ</button>
+        </div>
+        
+        <h3 style="margin-top:20px;">ความเครียด (Stress: 0-200)</h3>
+        <div class="bar-container"><div class="bar" id="stress-bar" style="width:0%;">0/200</div></div>
+        <div class="flex">
+            <input type="number" id="stress-adj" value="10" style="width: 80px;">
+            <button onclick="adjustStress(1)">+ เพิ่มเครียด</button>
+            <button onclick="adjustStress(-1)">- ลดเครียด</button>
+        </div>
     </div>
-  </div>
-</div>
+    
+    <div class="box">
+        <h2>🎲 ลูกเต๋า</h2>
+        <div class="flex">
+            <input type="number" id="d_num" value="1" style="width: 50px;"> D 
+            <input type="number" id="d_face" value="20" style="width: 60px;"> 
+            <button onclick="rollDice('d')">ทอยลูกเต๋า</button>
+        </div>
+        <p id="d_result" style="color:#ffd26a; font-weight:bold; margin-top:5px;">ผลลัพธ์: -</p>
+    </div>
 
-<div class="box">
-  <h2>⚔️ สเตตัส & การทอยเต๋า</h2>
-  
-  <div class="flex" style="justify-content: center; margin-bottom: 20px;">
-    <div class="statbox">STR<br><input type="number" value="0"></div>
-    <div class="statbox">DEX<br><input type="number" value="0"></div>
-    <div class="statbox">CON<br><input type="number" value="0"></div>
-    <div class="statbox">INT<br><input type="number" value="0"></div>
-    <div class="statbox">WIS<br><input type="number" value="0"></div>
-    <div class="statbox">CHA<br><input type="number" value="0"></div>
-  </div>
-
-  <div class="dice-section">
-    <div class="controls">
-      <span style="width:30px; font-weight:bold;">PD:</span>
-      <input id="pd_face" type="number" value="6" style="width:40px;" title="หน้าเต๋า"> x 
-      <input id="pd_num" type="number" value="1" style="width:40px;" title="จำนวน"> 
-      <button onclick="rollDice('pd')">ทอย</button>
-      <span id="pd_result" class="result-span">-</span>
-    </div>
-    <div class="controls">
-      <span style="width:30px; font-weight:bold;">MD:</span>
-      <input id="md_face" type="number" value="6" style="width:40px;"> x 
-      <input id="md_num" type="number" value="1" style="width:40px;"> 
-      <button onclick="rollDice('md')">ทอย</button>
-      <span id="md_result" class="result-span">-</span>
-    </div>
-    <div class="controls">
-      <span style="width:30px; font-weight:bold;">ND:</span>
-      <input id="nd_face" type="number" value="6" style="width:40px;"> x 
-      <input id="nd_num" type="number" value="1" style="width:40px;"> 
-      <button onclick="rollDice('nd')">ทอย</button>
-      <span id="nd_result" class="result-span">-</span>
-    </div>
-  </div>
-</div>
-
-<div class="box">
-  <h2>💰 ของติดตัว & เงิน</h2>
-  จำนวนเหรียญ: <input type="number" value="0" style="width:80px;">
-  <br><br>
-  <textarea style="width:98%; height:80px;" placeholder="รายการไอเทม หรือ สกิล..."></textarea>
 </div>
 
 <script>
-// === CONFIGURATION ===
-const MAX_TIME = 3 * 60 * 60; // 3 Hours in seconds (10800s)
+// ==========================================================
+// 🚨🚨 ส่วนที่ 1: โค้ด Firebase Connection 🚨🚨
+// *กรุณาใส่กุญแจลับจริงของคุณตรงนี้*
+// ==========================================================
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY_HERE", // <-- 🔑 แทนที่ด้วยค่าจริงของคุณ
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // <-- 🔑 แทนที่ด้วยค่าจริงของคุณ
+    projectId: "YOUR_PROJECT_ID", // <-- 🔑 แทนที่ด้วยค่าจริงของคุณ
+    storageBucket: "...",
+    messagingSenderId: "...",
+    appId: "..."
+};
 
-// === STATE VARIABLES ===
-let waterTime = MAX_TIME;
-let foodTime = MAX_TIME;
-let hp = 200;
-let maxhp = 200;
+let db;
+let CHARACTER_ID = null;
+
+function connectCharacter() {
+    CHARACTER_ID = document.getElementById('char-id').value.trim();
+    if (!CHARACTER_ID) {
+        document.getElementById('status-message').textContent = '⚠️ กรุณาใส่ ID ตัวละคร';
+        return;
+    }
+
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore(); 
+        } else {
+            // Already initialized
+            db = firebase.firestore();
+        }
+        
+        document.getElementById('status-message').textContent = `✅ เชื่อมต่อ Firebase สำเร็จ. ID: ${CHARACTER_ID}`;
+        document.getElementById('connection-box').style.display = 'none';
+        document.getElementById('game-dashboard').style.display = 'block';
+        
+        loadDataFromFirestore();
+    } catch (e) {
+        document.getElementById('status-message').textContent = `❌ เชื่อมต่อล้มเหลว! ตรวจสอบ Firebase Config. Error: ${e.message}`;
+    }
+}
+
+
+// ==========================================================
+// ส่วนที่ 2: State & Time Loop (โค้ดเดิมที่ถูกแก้ไขให้เชื่อมกับ Firebase)
+
+// === STATE VARIABLES (Global) ===
+let waterTime = 3 * 60 * 60; // 3 Hours in seconds (10800s)
+let foodTime = 3 * 60 * 60;
 let sanity = 100;
 let stress = 0;
 let isPaused = false;
+let hasInitialized = false;
+
+const MAX_TIME = 3 * 60 * 60; // 10800s
+
+// === FIREBASE FUNCTIONS (Real-time Save/Load) ===
+function saveDataToFirestore(reason = "manual") {
+    if (!CHARACTER_ID || !db) return;
+    
+    const data = {
+        id: CHARACTER_ID,
+        hp: parseInt(document.getElementById('hp').value) || 0,
+        maxhp: parseInt(document.getElementById('maxhp').value) || 200,
+        waterTime: waterTime,
+        foodTime: foodTime,
+        sanity: sanity,
+        stress: stress,
+        isPaused: isPaused,
+        lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
+        // (เพิ่มค่า Stat อื่นๆ ที่จำเป็นต้องเซฟตรงนี้)
+    };
+    db.collection("characters").doc(CHARACTER_ID).set(data, { merge: true })
+        .then(() => {
+             // console.log("Data saved:", reason);
+        })
+        .catch((error) => { console.error("Error saving: ", error); });
+}
+
+function loadDataFromFirestore() {
+    if (!CHARACTER_ID || !db) return;
+    
+    db.collection("characters").doc(CHARACTER_ID).onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            
+            // Apply loaded data to local variables
+            document.getElementById('hp').value = data.hp || 0;
+            document.getElementById('maxhp').value = data.maxhp || 200;
+            waterTime = data.waterTime;
+            foodTime = data.foodTime;
+            sanity = data.sanity;
+            stress = data.stress;
+            isPaused = data.isPaused;
+            
+            // Render UI
+            updateBars();
+            syncHP();
+            togglePause(isPaused); // Update pause button state
+        } else if (!hasInitialized) {
+            // If no data and this is the first load, save default data to create the document
+            saveDataToFirestore("initial"); 
+            hasInitialized = true;
+        }
+    });
+}
 
 // === TIME & FORMATTING ===
 function formatTime(seconds) {
@@ -224,13 +305,34 @@ function formatTime(seconds) {
 
 // === MAIN LOOP (Every 1 Second) ===
 setInterval(() => {
-  if (!isPaused) {
+  if (!isPaused && CHARACTER_ID && db) {
+    let shouldSave = false;
+    
+    // Check Water/Food status
     if (waterTime > 0) waterTime--;
     if (foodTime > 0) foodTime--;
+
+    // Check for negative effects (e.g., HP loss)
+    if (waterTime <= 0 || foodTime <= 0) {
+        // Example: If starvation/dehydration, lose 1 HP every 10 seconds (for testing)
+        if (waterTime % 10 === 0) {
+            let currentHP = parseInt(document.getElementById('hp').value);
+            document.getElementById('hp').value = Math.max(0, currentHP - 1);
+            syncHP();
+            shouldSave = true;
+        }
+    }
+
     updateBars();
+    
+    // Save data every 60 seconds (or if HP changed)
+    if (waterTime % 60 === 0 || shouldSave) {
+         saveDataToFirestore("autosave");
+    }
   }
 }, 1000);
 
+// === CONTROLS MODIFIED TO SAVE DATA ===
 function updateBars() {
   // Water
   let waterPct = (waterTime / MAX_TIME) * 100;
@@ -243,12 +345,33 @@ function updateBars() {
   document.getElementById('food-bar').style.width = foodPct + "%";
   document.getElementById('food-bar').textContent = Math.round(foodPct) + "%";
   document.getElementById('food-timer').textContent = formatTime(foodTime);
+  
+  // Sanity/Stress
+  const sbar = document.getElementById('sanity-bar');
+  sbar.style.width = sanity + "%";
+  sbar.textContent = sanity + "/100";
+  
+  const tbar = document.getElementById('stress-bar');
+  tbar.style.width = (stress / 2) + "%";
+  tbar.textContent = stress + "/200";
+  
+  // Also syncs HP bar
+  syncHP(); 
 }
 
-// === CONTROLS ===
-function togglePause() {
-  isPaused = !isPaused;
+
+function togglePause(externalState) {
   const btn = document.getElementById('pause-btn');
+
+  // If called without arguments, it means the user clicked the button
+  if (externalState === undefined) {
+    isPaused = !isPaused;
+    saveDataToFirestore("pause_toggle"); 
+  } else {
+    // If called with arguments, it's updating from the database
+    isPaused = externalState; 
+  }
+  
   if (isPaused) {
     btn.textContent = "▶️ เริ่มเวลา";
     btn.classList.add("paused");
@@ -258,25 +381,7 @@ function togglePause() {
   }
 }
 
-function refill(type) {
-  // Convert input % to seconds
-  let amountPct = 0;
-  if (type === 'water') amountPct = parseInt(document.getElementById('drink-amount').value) || 0;
-  if (type === 'food') amountPct = parseInt(document.getElementById('eat-amount').value) || 0;
-
-  let secondsToAdd = (amountPct / 100) * MAX_TIME;
-
-  if (type === 'water') {
-    waterTime = Math.min(MAX_TIME, waterTime + secondsToAdd);
-  } else {
-    foodTime = Math.min(MAX_TIME, foodTime + secondsToAdd);
-  }
-  updateBars();
-  // Note: No HP healing logic here as requested
-}
-
-// === HP SYSTEM ===
-function adjustHP() {
+function adjustHP(direction) {
   const change = parseInt(document.getElementById('hp_change').value) || 0;
   const hpInput = document.getElementById('hp');
   const maxInput = document.getElementById('maxhp');
@@ -284,12 +389,18 @@ function adjustHP() {
   let currentVal = parseInt(hpInput.value);
   let maxVal = parseInt(maxInput.value);
   
-  currentVal += change;
+  if(direction > 0) {
+    currentVal += change;
+  } else {
+    currentVal -= change;
+  }
+
   if (currentVal < 0) currentVal = 0;
   if (currentVal > maxVal) currentVal = maxVal;
   
   hpInput.value = currentVal;
   syncHP();
+  saveDataToFirestore("hp_adjust"); // <-- SAVES DATA
 }
 
 function syncHP() {
@@ -307,20 +418,30 @@ function syncHP() {
   bar.textContent = `${val}/${max}`;
 }
 
-// Manual inputs listener
-document.getElementById('hp').addEventListener('input', syncHP);
-document.getElementById('maxhp').addEventListener('input', syncHP);
+function refill(type) {
+  let amountPct = 0;
+  if (type === 'water') amountPct = parseInt(document.getElementById('drink-amount').value) || 0;
+  if (type === 'food') amountPct = parseInt(document.getElementById('eat-amount').value) || 0;
 
-// === SANITY & STRESS ===
+  let secondsToAdd = (amountPct / 100) * MAX_TIME;
+
+  if (type === 'water') {
+    waterTime = Math.min(MAX_TIME, waterTime + secondsToAdd);
+  } else {
+    foodTime = Math.min(MAX_TIME, foodTime + secondsToAdd);
+  }
+  updateBars();
+  saveDataToFirestore(type + "_refill"); // <-- SAVES DATA
+}
+
 function adjustSanity(dir) {
   const amount = parseInt(document.getElementById('sanity-adj').value) || 0;
   sanity += (amount * dir);
   if (sanity < 0) sanity = 0;
   if (sanity > 100) sanity = 100;
   
-  const bar = document.getElementById('sanity-bar');
-  bar.style.width = sanity + "%";
-  bar.textContent = sanity + "/100";
+  updateBars();
+  saveDataToFirestore("sanity_adjust"); // <-- SAVES DATA
 }
 
 function adjustStress(dir) {
@@ -329,28 +450,10 @@ function adjustStress(dir) {
   if (stress < 0) stress = 0;
   if (stress > 200) stress = 200;
   
-  const bar = document.getElementById('stress-bar');
-  bar.style.width = (stress / 2) + "%"; // Scale 200 to 100%
-  bar.textContent = stress + "/200";
+  updateBars();
+  saveDataToFirestore("stress_adjust"); // <-- SAVES DATA
 }
 
-function calcStressPenalty() {
-  const diceCount = parseInt(document.getElementById('dice-count-calc').value) || 3;
-  let penalty = 0;
-  
-  if (stress >= 150) {
-    penalty = -30;
-  } else {
-    // Every 10 stress = -1 * diceCount
-    penalty = -(Math.floor(stress / 10) * diceCount);
-  }
-  
-  const res = document.getElementById('stress-penalty-result');
-  res.textContent = `ผลลบ: ${penalty}`;
-  res.style.color = penalty < 0 ? '#ff4444' : '#ffd26a';
-}
-
-// === DICE ROLLER ===
 function rollDice(type) {
   const face = parseInt(document.getElementById(type+'_face').value);
   const num = parseInt(document.getElementById(type+'_num').value);
@@ -366,10 +469,10 @@ function rollDice(type) {
   document.getElementById(type+'_result').textContent = `${total} (${rolls.join(', ')})`;
 }
 
-// Init
-syncHP();
-updateBars();
-</script>
+// Event Listeners for direct input changes (HP/MaxHP)
+document.getElementById('hp').addEventListener('change', () => saveDataToFirestore("hp_manual"));
+document.getElementById('maxhp').addEventListener('change', () => saveDataToFirestore("maxhp_manual"));
 
+</script>
 </body>
 </html>
